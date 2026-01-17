@@ -6,3 +6,4 @@
     - common
     - postgres
     - neo4j
+    - redis

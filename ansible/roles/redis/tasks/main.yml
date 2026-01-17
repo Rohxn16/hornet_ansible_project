@@ -1,0 +1,19 @@
+---
+- name: Install Redis
+  apt:
+    name: "{{ redis_packages }}"
+    state: present
+    update_cache: yes
+
+- name: Configure redis.conf
+  lineinfile:
+    path: /etc/redis/redis.conf
+    regexp: '^bind '
+    line: "bind {{ redis_bind }}"
+  notify: restart redis
+
+- name: Ensure Redis is running
+  service:
+    name: redis-server
+    state: started
+    enabled: true
