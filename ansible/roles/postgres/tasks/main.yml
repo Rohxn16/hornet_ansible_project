@@ -1,0 +1,62 @@
+---
+- name: Install postgreSQL packages on ubuntu machine
+  apt:
+    name: "{{ postgres_packages }}"
+    state: present
+
+- name: Ensure PostgreSQL service is running
+  service:
+    name: postgresql
+    state: started
+    enabled: true
+
+- name: Get PostgreSQL version
+  command: psql -V
+  register: pg_version_raw
+  changed_when: false
+
+- name: Set postgres version fact
+  set_fact:
+    postgres_version: "{{ pg_version_raw.stdout.split()[2].split('.')[0] }}"
+
+- name: Configure pg_hba.conf
+  template:
+    src: pg_hba.conf.j2
+    dest: /etc/postgresql/{{ postgres_version }}/main/pg_hba.conf
+    owner: postgres
+    group: postgres
+    mode: '0640'
+  notify: restart postgres
+
+- name: Flush handlers to restart postgres now
+  meta: flush_handlers
+
+- name: Create application DB user
+  postgresql_user:
+    name: "{{ postgres_user }}"
+    password: "{{ postgres_password }}"
+    state: present
+  become: yes
+  become_user: postgres
+  vars:
+    ansible_remote_tmp: /tmp/.ansible/tmp
+
+- name: Create PostgreSQL db
+  become_user: postgres
+  postgresql_db:
+    name: "{{ postgres_db }}"
+    owner: "{{ postgres_user }}"
+    state: present
+
+- name: Create users table
+  become_user: postgres
+  postgresql_query:
+    db: "{{ postgres_db }}"
+    query: |
+      CREATE TABLE IF NOT EXISTS {{ postgres_table }} (
+      id SERIAL PRIMARY KEY,
+      user_id TEXT UNIQUE,
+      name TEXT,
+      email TEXT
+      );
+
