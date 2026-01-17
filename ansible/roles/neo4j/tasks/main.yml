@@ -1,0 +1,40 @@
+---
+- name: Add Neo4j GPG key
+  apt_key:
+    url: https://debian.neo4j.com/neotechnology.gpg.key
+    state: present
+
+- name: Add Neo4j APT repository
+  apt_repository:
+    repo: "deb https://debian.neo4j.com stable {{ neo4j_version }}"
+    state: present
+    filename: neo4j
+
+- name: Install Neo4j
+  apt:
+    name: neo4j
+    state: present
+    update_cache: yes
+
+- name: Configure Neo4j
+  template:
+    src: neo4j.conf.j2
+    dest: /etc/neo4j/neo4j.conf
+    owner: neo4j
+    group: neo4j
+    mode: '0644'
+  notify: restart neo4j
+
+- name: Ensure Neo4j is started and enabled
+  service:
+    name: neo4j
+    state: started
+    enabled: true
+
+- name: Set Neo4j admin password (idempotent)
+  become: yes
+  become_user: neo4j
+  command: >
+    neo4j-admin dbms set-initial-password {{ neo4j_admin_password }}
+  args:
+    creates: /var/lib/neo4j/data/dbms/auth

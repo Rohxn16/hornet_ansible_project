@@ -1,0 +1,7 @@
+server.default_listen_address=0.0.0.0
+server.default_advertised_address=localhost
+
+server.http.listen_address=:{{ neo4j_http_port }}
+server.bolt.listen_address=:{{ neo4j_bolt_port }}
+
+dbms.security.auth_enabled=true
