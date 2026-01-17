@@ -1,0 +1,16 @@
+---
+
+- name: Update apt cache
+  apt:
+    update_cache: yes
+    cache_valid_time: 3600
+
+- name: Upgrade system packages
+  apt:
+    upgrade: dist
+
+- name: Install common required packages
+  apt:
+    name: "{{common_packages}}"
+    state: present
+

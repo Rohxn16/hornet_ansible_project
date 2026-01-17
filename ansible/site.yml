@@ -1,0 +1,6 @@
+---
+- name: Base system setup
+  hosts: nodes
+  become: true
+  roles:
+    - common

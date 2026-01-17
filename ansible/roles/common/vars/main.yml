@@ -1,0 +1,9 @@
+common_packages:
+  - curl
+  - git
+  - ca-certificates
+  - ufw
+  - python3
+  - python3-pip
+  - python3-venv
+
