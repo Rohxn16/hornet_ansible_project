@@ -1,9 +1,10 @@
+---
 postgres_packages:
   - postgresql
   - postgresql-contrib
   - python3-psycopg2
 
-postgres_db:    hornet_db
-postgres_user:  hornet_user
-postgres_password: hornet_password # gonna move to vault in the end
+postgres_db: hornet_db
+postgres_user: hornet_user
+postgres_password: "{{ vault_postgres_password }}"
 postgres_table: users
