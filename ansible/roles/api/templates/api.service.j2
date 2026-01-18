@@ -1,0 +1,21 @@
+[Unit]
+Description=Hornet Data Platform API
+After=network.target
+
+[Service]
+User={{ api_user }}
+Group={{ api_group }}
+
+WorkingDirectory={{ api_app_dir }}
+
+EnvironmentFile={{ api_base_dir }}/.env
+
+ExecStart={{ api_venv_dir }}/bin/uvicorn main:app \
+  --host {{ api_host }} \
+  --port {{ api_port }}
+
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

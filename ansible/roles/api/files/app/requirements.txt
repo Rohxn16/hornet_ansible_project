@@ -1,0 +1,6 @@
+pydantic-settings
+sqlalchemy
+psycopg2-binary
+fastapi[standard]
+uvicorn
+neo4j

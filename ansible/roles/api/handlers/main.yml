@@ -1,0 +1,5 @@
+- name: restart api
+  systemd:
+    name: hornet-api
+    state: restarted
+    daemon_reload: yes

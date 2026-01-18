@@ -1,0 +1,59 @@
+---
+# roles/api/tasks/main.yml
+
+- name: Create API user
+  ansible.builtin.user:
+    name: "{{ api_user }}"
+    system: yes
+    create_home: no
+
+- name: Create API directories
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: directory
+    owner: "{{ api_user }}"
+    group: "{{ api_group }}"
+    mode: "0755"
+  loop:
+    - "{{ api_base_dir }}"
+    - "{{ api_app_dir }}"
+    - "{{ api_venv_dir }}"
+
+- name: Copy API application files
+  ansible.builtin.copy:
+    src: app/
+    dest: "{{ api_app_dir }}/"
+    owner: "{{ api_user }}"
+    group: "{{ api_group }}"
+    # directory_mode ensures folders stay searchable (755) 
+    # while files stay readable (644)
+    directory_mode: "0755"
+    mode: "0644"
+
+- name: Install API requirements into virtualenv
+  ansible.builtin.pip:
+    requirements: "{{ api_app_dir }}/requirements.txt"
+    virtualenv: "{{ api_venv_dir }}"
+    virtualenv_command: python3 -m venv
+
+- name: Create API env file
+  ansible.builtin.template:
+    src: api.env.j2
+    dest: "{{ api_base_dir }}/.env"
+    owner: "{{ api_user }}"
+    group: "{{ api_group }}"
+    mode: "0600"
+
+- name: Install API systemd unit
+  ansible.builtin.template:
+    src: api.service.j2
+    dest: /etc/systemd/system/hornet-api.service
+    mode: "0644"
+  notify: restart api
+
+- name: Enable and start API service
+  ansible.builtin.systemd:
+    name: hornet-api
+    enabled: yes
+    state: started
+    daemon_reload: yes
